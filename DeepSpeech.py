@@ -18,7 +18,7 @@ import traceback
 
 from ds_ctcdecoder import ctc_beam_search_decoder, Scorer
 from six.moves import zip, range
-from tensorflow.contrib.lite.python import tflite_convert
+#from tensorflow.contrib.lite.python import tflite_convert
 from tensorflow.python.tools import freeze_graph
 from util.audio import audiofile_to_input_vector
 from util.config import Config, initialize_globals
@@ -658,10 +658,23 @@ def test():
     evaluate.evaluate(test_data, graph)
 
 
-def create_inference_graph(batch_size=1, n_steps=16, tflite=False):
+def create_inference_graph(input_tensor=None, seq_length=None, batch_size=1, n_steps=16, tflite=False):
     # Input tensor will be of shape [batch_size, n_steps, 2*n_context+1, n_input]
-    input_tensor = tf.placeholder(tf.float32, [batch_size, n_steps if n_steps > 0 else None, 2*Config.n_context+1, Config.n_input], name='input_node')
-    seq_length = tf.placeholder(tf.int32, [batch_size], name='input_lengths')
+    input_tensor = tf.placeholder(
+        tf.float32,
+        [
+            batch_size,
+            n_steps if n_steps > 0 else None,
+            2*Config.n_context+1,
+            Config.n_input
+        ],
+        name='input_node'
+    ) if input_tensor is None else input_tensor
+    seq_length = tf.placeholder(
+        tf.int32,
+        [batch_size],
+        name='input_lengths'
+    ) if seq_length is None else seq_length
 
     if not tflite:
         previous_state_c = variable_on_worker_level('previous_state_c', [batch_size, Config.n_cell_dim], initializer=None)
