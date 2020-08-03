@@ -692,7 +692,7 @@ def create_inference_graph(input_tensor=None, seq_length=None, batch_size=1, n_s
                            dropout=no_dropout,
                            batch_size=batch_size,
                            n_steps=n_steps,
-                           previous_state=previous_state,
+                           #previous_state=previous_state,
                            tflite=tflite)
 
     # TF Lite runtime will check that input dimensions are 1, 2 or 4
