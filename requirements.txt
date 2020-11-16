@@ -15,5 +15,7 @@ requests
 tables
 attrdict
 setuptools
-librosa <= 0.7.0
+librosa==0.7.0
 soundfile
+numba==0.45.1
+llvmlite==0.29.0
