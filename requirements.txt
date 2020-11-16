@@ -15,5 +15,5 @@ requests
 tables
 attrdict
 setuptools
-librosa
+librosa <= 0.7.0
 soundfile
