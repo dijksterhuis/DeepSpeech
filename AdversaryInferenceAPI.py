@@ -1,19 +1,12 @@
 import tensorflow as tf
 import numpy as np
 import os
-import sys
 import ds_ctcdecoder
 
 from abc import ABC
 from multiprocessing import cpu_count
 from cleverspeech.Utils import np_arr, lcomp
 
-sys.path.append(
-    os.getenv(
-        "DEEPSPEECH_SRC_DIR",
-        "./DeepSpeech"
-    )
-)
 import DeepSpeech
 from util.config import Config
 from util.text import Alphabet
