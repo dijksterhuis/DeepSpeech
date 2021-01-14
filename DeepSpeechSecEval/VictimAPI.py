@@ -21,6 +21,11 @@ class CarliniWagnerTransforms:
         :param batch_size: the size of the test data batch
         :param sample_rate: sample rate of the input audio files
         """
+        self.filter_bank_filepath = os.path.abspath(os.path.dirname(__file__))
+        self.filter_bank_filepath = os.path.join(
+            self.filter_bank_filepath, "filterbanks.npy"
+        )
+
         self.window_size = int(0.032 * sample_rate)
         self.window_step = int(0.02 * sample_rate)
         self.n_ceps = n_ceps
@@ -69,11 +74,10 @@ class CarliniWagnerTransforms:
         ffted = tf.spectral.rfft(windowed, [self.window_size])
         ffted = 1.0 / self.window_size * tf.square(tf.abs(ffted))
 
-        # TODO: filterbanks.npy should be loaded from a non-relative path...
         # 4. Compute the Mel windowing of the FFT
         energy = tf.reduce_sum(ffted, axis=2) + np.finfo(float).eps
 
-        filters = np.load("filterbanks.npy").T
+        filters = np.load(self.filter_bank_filepath).T
         filters = np_arr([filters for i in range(0, batch_size)], np.float32)
 
         feat = tf.matmul(ffted, filters) + np.finfo(float).eps
