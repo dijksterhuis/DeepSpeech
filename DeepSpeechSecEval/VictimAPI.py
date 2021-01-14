@@ -69,6 +69,7 @@ class CarliniWagnerTransforms:
         ffted = tf.spectral.rfft(windowed, [self.window_size])
         ffted = 1.0 / self.window_size * tf.square(tf.abs(ffted))
 
+        # TODO: filterbanks.npy should be loaded from a non-relative path...
         # 4. Compute the Mel windowing of the FFT
         energy = tf.reduce_sum(ffted, axis=2) + np.finfo(float).eps
 
