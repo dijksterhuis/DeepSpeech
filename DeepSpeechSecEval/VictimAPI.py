@@ -5,7 +5,7 @@ import ds_ctcdecoder
 
 from abc import ABC
 from multiprocessing import cpu_count
-from cleverspeech.Utils import np_arr, lcomp
+from cleverspeech.utils.Utils import np_arr, lcomp
 
 import DeepSpeech
 from util.config import Config
