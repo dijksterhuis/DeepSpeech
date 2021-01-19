@@ -123,15 +123,19 @@ class Model(ABC):
         self.sess = sess
 
         # Add DS lib to the path then run the configuration for it
+        model_data_path = os.path.abspath(os.path.dirname(__file__))
 
-        self.checkpoint_dir = os.getenv(
-            "DEEPSPEECH_CHECKPOINT_DIR",
-            "./deepspeech-v0.4.1-checkpoint"
+        self.checkpoint_dir = os.path.abspath(
+            os.path.join(
+                model_data_path, "../../data/deepspeech-0.4.1-checkpoint/"
+            )
         )
-        self.model_dir = os.getenv(
-            "DEEPSPEECH_MODEL_DIR",
-            "./data"
+        self.model_dir = os.path.abspath(
+            os.path.join(
+                model_data_path, "../../data/models/"
+            )
         )
+
         self.tokens = tokens
         self.decoder = decoder
         self.beam_width = beam_width
