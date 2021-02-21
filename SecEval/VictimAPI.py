@@ -152,7 +152,7 @@ class Model(ABC):
         self.scorer = None
 
         self.initialise()
-        self.create_graph(input_tensor, batch.audios.feature_lengths, batch.size)
+        self.create_graph(input_tensor, batch.audios["ds_feats"], batch.size)
         self.load_checkpoint()
 
     def __configure(self):
@@ -297,7 +297,7 @@ class Model(ABC):
             decodings = self.tf_beam_decode(
                 self.sess,
                 logits,
-                batch.audios.feature_lengths,
+                batch.audios["ds_feats"],
                 self.tokens,
             )
             return decodings
@@ -328,7 +328,7 @@ class Model(ABC):
 
             decoding_probs = self.ds_decode_batch(
                 logits,
-                batch.audios.feature_lengths,
+                batch.audios["ds_feats"],
             )
 
             if top_five is True:
@@ -353,7 +353,7 @@ class Model(ABC):
             decodings = self.tf_greedy_decode(
                 self.sess,
                 logits,
-                batch.audios.feature_lengths,
+                batch.audios["ds_feats"],
                 self.tokens,
             )
             return decodings
