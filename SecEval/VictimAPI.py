@@ -346,6 +346,53 @@ class Model(ABC):
 
             return decodings, probs
 
+        elif decoder == "batch_no_lm":
+
+            if logits is None:
+                logits = self.get_logits(self.logits, feed)
+
+            decoding_probs = self.ds_decode_batch_no_lm(
+                logits,
+                batch.audios["ds_feats"],
+            )
+
+            if top_five is True:
+
+                probs = [
+                    [decoding_probs[j][:5][i][0] for i in range(0, 5)] for j in range(batch.size)
+                ]
+                decodings = [
+                    [decoding_probs[j][:5][i][1] for i in range(0, 5)] for j in range(batch.size)
+                ]
+
+            else:
+                probs = [decoding_probs[j][0][0] for j in range(batch.size)]
+                decodings = [decoding_probs[j][0][1] for j in range(batch.size)]
+
+            return decodings, probs
+
+        elif decoder == "ds_greedy_no_lm":
+
+            self.beam_width = 1
+
+            if top_five is True:
+                raise NotImplementedError(
+                    "top_five is not implemented for the ds_greedy_no_lm decoder"
+                )
+
+            if logits is None:
+                logits = self.get_logits(self.logits, feed)
+
+            decoding_probs = self.ds_decode_batch_no_lm(
+                logits,
+                batch.audios["ds_feats"],
+            )
+
+            probs = [decoding_probs[j][0][0] for j in range(batch.size)]
+            decodings = [decoding_probs[j][0][1] for j in range(batch.size)]
+
+            return decodings, probs
+
         elif decoder == "greedy":
             if logits is None:
                 logits = self.get_logits(self.raw_logits, feed)
@@ -387,6 +434,23 @@ class Model(ABC):
             Config.alphabet,
             self.beam_width,
             scorer=self.scorer,
+            num_processes=cpu_count() // 2
+        )
+
+        return decoded_probs
+
+    def ds_decode_batch_no_lm(self, logits, lengths):
+
+        l = lengths[0]
+
+        # I have 6 cores on my development machine -- I also want to do other
+        # things like write papers when running experiments.
+
+        decoded_probs = ds_ctcdecoder.ctc_beam_search_decoder_batch(
+            logits,
+            np.asarray([l for _ in range(logits.shape[0])], dtype=np.int32),
+            Config.alphabet,
+            self.beam_width,
             num_processes=cpu_count() // 2
         )
 
