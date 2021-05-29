@@ -313,10 +313,10 @@ class Model(ABC):
                 ) for logit in logits
             ]
             if top_five is True:
-                probs = [decoding_probs[i][0] for i in range(0, 5)]
+                probs = [-decoding_probs[i][0] for i in range(0, 5)]
                 decodings = [decoding_probs[i][1] for i in range(0, 5)]
             else:
-                probs = decoding_probs[0][0][0]
+                probs = -decoding_probs[0][0][0]
                 decodings = decoding_probs[0][0][1]
 
             return decodings, probs
@@ -334,14 +334,14 @@ class Model(ABC):
             if top_five is True:
 
                 probs = [
-                    [decoding_probs[j][:5][i][0] for i in range(0, 5)] for j in range(batch.size)
+                    [-decoding_probs[j][:5][i][0] for i in range(0, 5)] for j in range(batch.size)
                 ]
                 decodings = [
                     [decoding_probs[j][:5][i][1] for i in range(0, 5)] for j in range(batch.size)
                 ]
 
             else:
-                probs = [decoding_probs[j][0][0] for j in range(batch.size)]
+                probs = [-decoding_probs[j][0][0] for j in range(batch.size)]
                 decodings = [decoding_probs[j][0][1] for j in range(batch.size)]
 
             return decodings, probs
@@ -359,14 +359,14 @@ class Model(ABC):
             if top_five is True:
 
                 probs = [
-                    [decoding_probs[j][:5][i][0] for i in range(0, 5)] for j in range(batch.size)
+                    [-decoding_probs[j][:5][i][0] for i in range(0, 5)] for j in range(batch.size)
                 ]
                 decodings = [
                     [decoding_probs[j][:5][i][1] for i in range(0, 5)] for j in range(batch.size)
                 ]
 
             else:
-                probs = [decoding_probs[j][0][0] for j in range(batch.size)]
+                probs = [-decoding_probs[j][0][0] for j in range(batch.size)]
                 decodings = [decoding_probs[j][0][1] for j in range(batch.size)]
 
             return decodings, probs
@@ -388,7 +388,7 @@ class Model(ABC):
                 batch.audios["ds_feats"],
             )
 
-            probs = [decoding_probs[j][0][0] for j in range(batch.size)]
+            probs = [-decoding_probs[j][0][0] for j in range(batch.size)]
             decodings = [decoding_probs[j][0][1] for j in range(batch.size)]
 
             return decodings, probs
