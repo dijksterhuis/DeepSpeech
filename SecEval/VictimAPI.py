@@ -394,6 +394,23 @@ class Model(ABC):
             return decodings, probs
 
         elif decoder == "greedy":
+
+            self.beam_width = 1
+
+            if logits is None:
+                logits = self.get_logits(self.logits, feed)
+
+            decoding_probs = self.ds_decode_batch(
+                logits,
+                batch.audios["ds_feats"],
+            )
+
+            probs = [-decoding_probs[j][0][0] for j in range(batch.size)]
+            decodings = [decoding_probs[j][0][1] for j in range(batch.size)]
+
+            return decodings, probs
+
+        elif decoder == "tf_greedy":
             if logits is None:
                 logits = self.get_logits(self.raw_logits, feed)
 
