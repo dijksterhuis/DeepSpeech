@@ -371,13 +371,13 @@ class Model(ABC):
 
             return decodings, probs
 
-        elif decoder == "ds_greedy_no_lm":
+        elif decoder == "greedy_no_lm":
 
             self.beam_width = 1
 
             if top_five is True:
                 raise NotImplementedError(
-                    "top_five is not implemented for the ds_greedy_no_lm decoder"
+                    "top_five is not implemented for greedy decoders"
                 )
 
             if logits is None:
@@ -395,6 +395,11 @@ class Model(ABC):
 
         elif decoder == "greedy":
 
+            if top_five is True:
+                raise NotImplementedError(
+                    "top_five is not implemented for greedy decoders"
+                )
+
             self.beam_width = 1
 
             if logits is None:
@@ -411,6 +416,12 @@ class Model(ABC):
             return decodings, probs
 
         elif decoder == "tf_greedy":
+
+            if top_five is True:
+                raise NotImplementedError(
+                    "top_five is not implemented for greedy decoders"
+                )
+
             if logits is None:
                 logits = self.get_logits(self.raw_logits, feed)
 
@@ -424,7 +435,7 @@ class Model(ABC):
 
         else:
             raise Exception(
-                "Please choose a valid decoder -- tf, greedy, ds or batch"
+                "Please choose a valid decoder."
             )
 
     def ds_decode(self, logits):
