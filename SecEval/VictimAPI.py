@@ -68,7 +68,7 @@ class CarliniWagnerTransforms:
         size = audio.get_shape().as_list()[1]
         windowed = tf.stack(lcomp(self._window_generator(audio, size)), 1)
         window = np.hamming(self.window_size)
-        windowed = windowed * window
+        self.windowed = windowed = windowed * window
 
         # 3. Take the FFT to convert to frequency space
         ffted = tf.spectral.rfft(windowed, [self.window_size])
@@ -140,7 +140,7 @@ class Model(ABC):
         self.decoder = decoder
         self.beam_width = beam_width
         # beam_width = tf.app.flags.FLAGS.beam_width
-
+        self.feature_extraction = None
         self.raw_logits = None
         self.logits = None
         self.inputs = None
@@ -212,15 +212,15 @@ class Model(ABC):
 
     def create_graph(self, input_tensor, seq_length, batch_size):
 
-        feature_extraction = CarliniWagnerTransforms(
+        self.feature_extraction = CarliniWagnerTransforms(
             input_tensor,
             batch_size
         )
-        feature_extraction.mfcc_ops()
-        feature_extraction.window_ops()
+        self.feature_extraction.mfcc_ops()
+        self.feature_extraction.window_ops()
 
         inputs, outputs, layers = DeepSpeech.create_inference_graph(
-            input_tensor=feature_extraction.features,
+            input_tensor=self.feature_extraction.features,
             seq_length=seq_length,
             n_steps=-1,
             batch_size=batch_size,
