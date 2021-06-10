@@ -498,7 +498,11 @@ class Model(ABC):
                 tokens[int(x)] for x in tf_dense[0][i]
             ]) for i in range(tf_dense[0].shape[0])]
 
-        return tf_outputs
+        tf_outputs = [o.rstrip(" ") for o in tf_outputs]
+
+        probs = self.tf_run(log_probs)
+        probs = [prob[0] for prob in probs]
+        return tf_outputs, probs
 
     def tf_greedy_decode(self, sess, logits, features_lengths, tokens, merge_repeated=True):
 
@@ -512,6 +516,8 @@ class Model(ABC):
         tf_outputs = [''.join([
                 tokens[int(x)] for x in tf_dense[0][i]
             ]) for i in range(tf_dense[0].shape[0])]
+
+        tf_outputs = [o.rstrip(" ") for o in tf_outputs]
 
         probs = self.tf_run(log_probs)
         probs = [prob[0] for prob in probs]
