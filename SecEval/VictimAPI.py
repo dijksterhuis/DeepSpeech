@@ -519,6 +519,6 @@ class Model(ABC):
 
         tf_outputs = [o.rstrip(" ") for o in tf_outputs]
 
-        probs = self.tf_run(log_probs)
-        probs = [prob[0] for prob in probs]
-        return tf_outputs, probs
+        neg_sum_logits = self.tf_run(log_probs)
+        neg_sum_logits = [prob[0] for prob in neg_sum_logits]
+        return tf_outputs, neg_sum_logits
