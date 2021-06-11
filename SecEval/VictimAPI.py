@@ -423,7 +423,18 @@ class Model(ABC):
                 )
 
             if logits is None:
-                logits = self.get_logits(self.raw_logits, feed)
+                logits = self.get_logits(self.logits, feed)
+
+            if type(logits) == np.ndarray and logits.shape[0] == batch.size:
+                # batch major but tf greedy search wants time major
+                logits = np.transpose(logits, [1, 0, 2])
+
+            elif type(logits) == tf.Tensor and logits.get_shape().as_list()[0] == batch.size:
+                # batch major but tf greedy search wants time major
+                logits = tf.transpose(logits, [1, 0, 2])
+
+            else:
+                pass
 
             decodings = self.tf_greedy_decode(
                 self.sess,
