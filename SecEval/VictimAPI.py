@@ -295,7 +295,6 @@ class Model(ABC):
                 logits = self.get_logits(self.raw_logits, feed)
 
             decodings = self.tf_beam_decode(
-                self.sess,
                 logits,
                 batch.audios["ds_feats"],
                 self.tokens,
@@ -437,7 +436,6 @@ class Model(ABC):
                 pass
 
             decodings = self.tf_greedy_decode(
-                self.sess,
                 logits,
                 batch.audios["ds_feats"],
                 self.tokens,
@@ -495,7 +493,7 @@ class Model(ABC):
 
         return decoded_probs
 
-    def tf_beam_decode(self, sess, logits, features_lengths, tokens):
+    def tf_beam_decode(self, logits, features_lengths, tokens):
 
         tf_decode, log_probs = tf.nn.ctc_beam_search_decoder(
             logits,
@@ -515,7 +513,7 @@ class Model(ABC):
         probs = [prob[0] for prob in probs]
         return tf_outputs, probs
 
-    def tf_greedy_decode(self, sess, logits, features_lengths, tokens, merge_repeated=True):
+    def tf_greedy_decode(self, logits, features_lengths, tokens, merge_repeated=True):
 
         tf_decode, log_probs = tf.nn.ctc_greedy_decoder(
             logits,
