@@ -284,7 +284,7 @@ class Model(ABC):
         else:
             decoder = self.decoder
 
-        if decoder == "tf":
+        if decoder == "tf_beam":
 
             if top_five is True:
                 raise NotImplementedError(
