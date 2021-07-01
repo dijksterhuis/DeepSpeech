@@ -5,7 +5,7 @@ import ds_ctcdecoder
 
 from abc import ABC
 from multiprocessing import cpu_count
-from cleverspeech.utils.Utils import np_arr, lcomp
+from cleverspeech.utils.Utils import np_arr, lcomp, log
 
 import DeepSpeech
 from util.config import Config
@@ -226,6 +226,8 @@ class Model(ABC):
 
     def create_graph(self, input_tensor, seq_length, batch_size):
 
+        log("Creating DeepSpeech model graph.", wrap=False)
+
         self.feature_extraction = CarliniWagnerTransforms(
             input_tensor,
             batch_size
@@ -250,7 +252,14 @@ class Model(ABC):
         self.raw_logits = layers['raw_logits']
         self.logits = tf.transpose(outputs['outputs'], [1, 0, 2])
 
+        log("DeepSpeech model graph created.", wrap=True)
+
     def load_checkpoint(self):
+
+        log(
+            "Restoring DeepSpeech checkpoint: {}".format(self.checkpoint_dir),
+            wrap=False
+        )
 
         mapping = {
             v.op.name: v
@@ -269,6 +278,8 @@ class Model(ABC):
 
         checkpoint_path = checkpoint.model_checkpoint_path
         saver.restore(self.sess, checkpoint_path)
+
+        log("Restored from checkpoint.", wrap=True)
 
     def get_logits(self, logits, feed):
         try:
