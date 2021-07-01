@@ -65,10 +65,11 @@ class CarliniWagnerTransforms:
         audio = tf.concat((audio[:, :1], audio[:, 1:] - 0.97 * audio[:, :-1]), 1)
 
         # 2. windowing into frames of 320 samples, overlapping
-        size = audio.get_shape().as_list()[1]
-        windowed = tf.stack(lcomp(self._window_generator(audio, size)), 1)
+        windows = tf.signal.frame(
+            audio, self.window_size, self.window_step, axis=-1, name="qq_frame"
+        )
         window = np.hamming(self.window_size)
-        self.windowed = windowed = windowed * window
+        self.windowed = windowed = windows * window
 
         # 3. Take the FFT to convert to frequency space
         ffted = tf.spectral.rfft(windowed, [self.window_size])
@@ -100,21 +101,34 @@ class CarliniWagnerTransforms:
         )
 
     def window_ops(self):
+        """
+        Recreate the "create_overlapping_windows" function from modern
+        DeepSpeech implementations as it is more GPU memory friendly.
+
+        The previous CW implementation seemed to have a bunch of problems with
+        memory leaks on larger batch sizes due to the tf.stacking of audio
+        frames.
+
+        https://github.com/mozilla/DeepSpeech/blob/master/training/deepspeech_training/train.py#L58
+        :return:
+        """
+
         if self.mfcc is None:
             raise AttributeError("You haven't created an mfcc value yet!")
 
-        empty_context = np.zeros(
-            (self.batch_size, self.n_contexts, self.n_ceps),
-            dtype=np.float32
+        batch_size = self.batch_size
+
+        eye_filter = np.asarray(
+            np.eye(self.tot_contexts * self.n_ceps).reshape(
+                self.tot_contexts, self.n_ceps, self.tot_contexts * self.n_ceps),
+                 np.float32
         )
-        features = tf.concat((empty_context, self.mfcc, empty_context), 1)
-        features = tf.reshape(features, [self.batch_size, -1])
-        features = tf.stack(lcomp(self._context_generator(features)), 1)
-        features = tf.reshape(
-            features,
-            [self.batch_size, -1, self.tot_contexts, self.n_ceps]
+
+        contexts = tf.nn.conv1d(self.mfcc, eye_filter, 1, 'SAME', name="qq_conv")
+
+        self.features = tf.reshape(
+            contexts, [batch_size, -1, self.tot_contexts, self.n_ceps]
         )
-        self.features = features
 
 
 class Model(ABC):
@@ -244,9 +258,6 @@ class Model(ABC):
             if not v.op.name.startswith('previous_state_')
             and not v.op.name.startswith("qq")
         }
-
-        # print("=-=-=-=- Initialised Variables")
-        # for v in tf.global_variables(): print(v)
 
         self.saver = saver = tf.train.Saver(mapping)
         checkpoint = tf.train.get_checkpoint_state(self.checkpoint_dir)
